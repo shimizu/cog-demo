@@ -1,41 +1,84 @@
 import React, {useState,  useEffect } from 'react';
-import DeckGL from 'deck.gl';
+import DeckGL, { MapView, FlyToInterpolator }from 'deck.gl';
+import { bbox, buffer, point, bboxPolygon} from "@turf/turf"
+
+console.log(bbox)
 
 import { renderLayers } from "./RenderLayers";
+
+
+import dammyData from './data/dammy.json'
 
 // 初期ビューポートの設定
 const INITIAL_VIEW_STATE = {
     latitude: 35.73202612464274,
     longitude: 137.53268402693763,
-    bearing: 0,
-    pitch: 0,
-    zoom: 4
+    zoom: 1
 };
 
 
 function Map() {
-    const [data, setData] = useState(null)
+    //マウスカーソルスタイル
+    const [cursor, setCursor] = useState('move')
+
     const [viwState, setViewState] = useState(INITIAL_VIEW_STATE)
 
+    const [cogBbox, setCogBbox] = useState(null)
+    const [cogBboxPoly, setCogBboxPoly] = useState(null)
 
-    //GeoJSONデータの読み込み
-    useEffect(()=>{
-        const loadGeoJSON = async ()=>{
-            const res = await fetch("./data/pref.geojson")
-            const json = await res.json();
-            setData(json)
+
+    useEffect(() => {
+        console.log("cogBbox", cogBbox)
+
+
+    }, [cogBbox])
+
+
+    const handleOnClick = (e)=>{
+
+        const calBuffer = buffer(point([e.lon, e.lat]), 200, { units: 'kilometers' });
+        const calBBox = bbox(calBuffer);
+        setCogBbox(calBBox)
+
+        const calBBoxPolygon = bboxPolygon(calBBox)
+        setCogBboxPoly(calBBoxPolygon)
+
+
+        setViewState(v=>{
+            return {
+                longitude: e.lon,
+                latitude: e.lat,
+                zoom: 6,
+                transitionDuration: 1000, //アニメーションの秒数を設定する
+                transitionInterpolator: new FlyToInterpolator() // アニメーションのスタイルを設定する
+            }
+        })
+    }
+
+    //マウスホバーハンドラ
+    const handlerOnMakerHover = d => {
+        //マーカー外をホバーしたとき
+        if (!d.layer) {
+            setCursor('move')
+        }else{
+            //マーカーをホバーしたとき
+            setCursor('pointer')
         }
-
-        loadGeoJSON();
-    },[])
-
+    }
 
     return (
         <div>
             <DeckGL
+                views={new MapView({ repeat: true })}
                 initialViewState={viwState}
                 controller={true}
-                layers={renderLayers({ data })}
+                getCursor={() => cursor}
+                layers={renderLayers({ 
+                    data: dammyData,
+                    cogBboxPoly: cogBboxPoly,
+                    onClick: handleOnClick 
+                })}
+                onHover={handlerOnMakerHover}
             >
             </DeckGL>
             <div className="attribution">

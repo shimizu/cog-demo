@@ -18,7 +18,10 @@
     "url": "https://github.com/shimizu/gha-gcs_deploy-example/issues"
   },
   "dependencies": {
+    "@turf/turf": "^6.5.0",
+    "d3-color": "^3.1.0",
     "deck.gl": "^8.8.20",
+    "geotiff": "^2.0.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
