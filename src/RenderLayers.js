@@ -26,9 +26,51 @@ d3color.prototype.toArray = function () {
 }
 
 
-export function renderLayers({ data, cogBboxPoly, onClick}) {
+const convertImageData = (raster) => {
+  if(!raster) return null;
+  let [r] = raster; 
+  let { width, height } = raster;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+
+  for (let i = 0; i < r.length; i++) {
+    let rs = r[i];  // some scaling
+    data[i * 4] = rs > 0 ? 255 : 0;
+    data[i * 4 + 1] = 0;
+    data[i * 4 + 2] = 0;
+    data[i * 4 + 3] = rs > 0 ? 255: 0 ;
+  }
+
+  const img = new ImageData(data, width, height)
+
+  console.log(img)
+
+  ctx.putImageData(img, 0, 0);
+
+
+  return canvas
+
+}
+
+export function renderLayers({ data, rasterData, cogBbox, cogBboxPoly, onClick}) {
  
-  console.log(data)
+
+  //console.log(data)
+
+  const foresstlossData = convertImageData(rasterData)
+
+  let foressloss = null
+
+  if (foresstlossData) foressloss = new BitmapLayer({
+    data: null,
+    image: foresstlossData,
+    bounds: cogBbox
+  });
 
 
 
@@ -92,5 +134,5 @@ export function renderLayers({ data, cogBboxPoly, onClick}) {
   });  
 
   //レイヤーの重なり順を配列で指定(先頭のレイヤーが一番下になる)
-  return [tileLayer, scatter, buffer];
+  return [ foressloss , scatter, buffer];
 }
