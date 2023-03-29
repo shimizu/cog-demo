@@ -7,8 +7,16 @@ import BaseMap from 'react-map-gl';
 
 import { renderLayers } from "./RenderLayers";
 
+/*
+import dammyData from './data/point.json'
+*/
 
-import dammyData from './data/dammy.json'
+import dammyData from './data/all.json'
+
+dammyData = Object.keys(dammyData).map(key =>{
+    return point([dammyData[key].longitude, dammyData[key].latitude], {id:key})
+})
+
 
 // 初期ビューポートの設定
 const INITIAL_VIEW_STATE = {
@@ -17,9 +25,11 @@ const INITIAL_VIEW_STATE = {
     zoom: 1
 };
 
-const GeotiffURL = "https://g3-data.s3.ap-northeast-1.amazonaws.com/COG/test/cog-forestloss-tile.tif"
+const GeotiffURL = "https://rating-platform-dev-geo.s3.ap-northeast-1.amazonaws.com/cog/cog-Hansen_GFC-2021-v1.9_lossyear.tif"
 
 function Map() {
+    const [cogURL, setCOGURL] = useState(GeotiffURL)
+
     //マウスカーソルスタイル
     const [cursor, setCursor] = useState('pointer')
 
@@ -34,8 +44,9 @@ function Map() {
 
     useEffect(() => {
         if (!cogBbox) return;
+        if (!cogURL) return;
         const loadAoiRaster = async ()=>{
-            const cog = await fromUrl(GeotiffURL)
+            const cog = await fromUrl(cogURL)
             const aoiRaster = await cog.readRasters({
                 bbox: cogBbox,
                 resX: 0.01,
@@ -48,11 +59,10 @@ function Map() {
         loadAoiRaster()
 
 
-    }, [cogBbox])
+    }, [cogBbox, cogURL])
 
 
     const handleOnClick = (e)=>{
-
         const calBuffer = buffer(point([e.lon, e.lat]), 200, { units: 'kilometers' });
         const calBBox = bbox(calBuffer);
         setCogBbox(calBBox)
@@ -72,20 +82,29 @@ function Map() {
         })
     }
 
+    const handlerOnChange =  (e) => {
+        setRasterData(null)
+        setCOGURL(e.target.value)
+    } 
 
-    //マウスホバーハンドラ
-    const handlerOnMakerHover = d => {
-        //マーカー外をホバーしたとき
-        if (!d.layer) {
-            setCursor('move')
-        }else{
-            //マーカーをホバーしたとき
-            setCursor('pointer')
-        }
-    }
 
     return (
         <div>
+            <h1>cloud optimized geotiff(COG)リクエストテスト</h1>
+            <p>下記URLを変更して地図上マーカーをクリックしてください。正しくCOGが読み込めている場合、地図上にデータが可視化されます</p>
+            <label>COG URL:<input
+                style={{width:"600px", marginBottom:"1em"}} 
+                type="text"
+                defaultValue={cogURL}
+                onChange={handlerOnChange}
+                >
+            </input></label>
+            <div style={{
+                position: "relative",
+                width: "100%",
+                height: "600px",
+                marigin: "10px"
+            }}>
             <DeckGL
                 views={new MapView({ repeat: true })}
                 initialViewState={viwState}
@@ -104,16 +123,7 @@ function Map() {
                     mapStyle={"mapbox://styles/mapbox/light-v10"}
                     mapboxAccessToken={"pk.eyJ1Ijoic2hpbWl6dSIsImEiOiJjbGViajl1bWwxOW04M3Zwa2Uxc3J4eTNoIn0.Z3KLWOUk9-rr9qGvQsNOPw"}
                 />
-
             </DeckGL>
-            <div className="attribution">
-                <a
-                    href="http://www.openstreetmap.org/about/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    © OpenStreetMap
-                </a>
             </div>
         </div>
     );

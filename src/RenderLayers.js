@@ -48,17 +48,14 @@ const convertImageData = (raster) => {
 
   const img = new ImageData(data, width, height)
 
-  console.log(img)
-
   ctx.putImageData(img, 0, 0);
-
-
   return canvas
 
 }
 
 export function renderLayers({ data, rasterData, cogBbox, cogBboxPoly, onClick}) {
  
+  const filterd = data.filter(d => d.Country == "Brazil" || d.Country == "Malaysia")
 
   //console.log(data)
 
@@ -67,6 +64,7 @@ export function renderLayers({ data, rasterData, cogBbox, cogBboxPoly, onClick})
   let foressloss = null
 
   if (foresstlossData) foressloss = new BitmapLayer({
+    id: 'cog-layer_'+ ~~(Math.random()*1000),
     data: null,
     image: foresstlossData,
     bounds: cogBbox
@@ -86,28 +84,28 @@ export function renderLayers({ data, rasterData, cogBbox, cogBboxPoly, onClick})
   });
 
 
-  const scatter = new ScatterplotLayer({
-    id: 'scatterplot-layer',
+  const scatter = new GeoJsonLayer({
+    id: 'point-layer',
     data: data,
     pickable: true,
     opacity: 0.8,
     stroked: true,
     filled: true,
-    radiusScale: 100,
-    radiusMinPixels: 6,
-    radiusMaxPixels: 100,
+    pointRadiusScale: 100,
+    pointRadiusMinPixels: 6,
+    pointRadiusMaxPixels: 100,
     lineWidthMinPixels: 1,
-    getRadius: 10,
+    getPointRadius: 10,
     getPosition: d => {
       return [d.lon, d.lat]
     },
-    getFillColor: d => {
-      const c = MAKER_COLORS[d['AFOLU Activities']] || MAKER_OTHER_COLOR
-      return d3color(c).toArray()
-    },
+    getFillColor: [255, 160, 0],
     getLineColor: [0, 0, 0],
     onClick: d => {
-      onClick(d.object)
+      const p = d.object.properties
+      const c = d.object.geometry.coordinates
+      const res = {id:p.id, lon:c[0],lat:c[1] }
+      onClick(res)
     }
   })
 

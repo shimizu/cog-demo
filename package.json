@@ -23,12 +23,13 @@
     "deck.gl": "^8.8.20",
     "geotiff": "^2.0.7",
     "gh-pages": "^5.0.0",
+    "json-2-csv": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-map-gl": "^7.0.21"
   },
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.18.5",
+    "@babel/plugin-transform-runtime": "^7.21.0",
     "@babel/preset-env": "^7.15.8",
     "@babel/preset-react": "^7.14.5",
     "@babel/runtime": "^7.18.3",
