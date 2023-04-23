@@ -23,7 +23,7 @@ module.exports = {
         publicPath: '',
     },
     devServer: {
-        port: 'auto',
+        port: '3000',
         open: true
     },
     devtool: 'source-map',

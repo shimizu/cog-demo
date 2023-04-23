@@ -25,7 +25,7 @@ const INITIAL_VIEW_STATE = {
     zoom: 1
 };
 
-const GeotiffURL = "https://rating-platform-dev-geo.s3.ap-northeast-1.amazonaws.com/cog/cog-Hansen_GFC-2021-v1.9_lossyear.tif"
+const GeotiffURL = "https://assets-rating-platform-dev-geo.dev-vcc.sustainacraft.com/cog/cog-Hansen_GFC-2021-v1.9_lossyear.tif"
 
 function Map() {
     const [cogURL, setCOGURL] = useState(GeotiffURL)
